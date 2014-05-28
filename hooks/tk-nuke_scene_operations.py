@@ -42,7 +42,7 @@ class BreakdownSceneOperations(Hook):
 
         reads = []
 
-        # first let's look at maya references
+        # first let's look at the read nodes
         for node in nuke.allNodes("Read"):
 
             node_name = node.name()
