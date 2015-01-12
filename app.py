@@ -23,10 +23,25 @@ class MultiBreakdown(Application):
         """
         Called as the application is being initialized
         """
-
         tk_multi_breakdown = self.import_module("tk_multi_breakdown")
         cb = lambda : tk_multi_breakdown.show_dialog(self)
         self.engine.register_command("Scene Breakdown...", cb, { "short_name": "breakdown" })
 
 
-
+    def show_ui(self):
+        """
+        Show the breakdown UI.
+        
+        This is a helper method to make it easy to programatically access the breakdown UI.
+        External code could then do something like:
+        
+        >>> import sgtk
+        >>> e = sgtk.platform.current_engine()
+        >>> e.apps["tk-multi-breakdown"].show_ui()
+        """        
+        tk_multi_breakdown = self.import_module("tk_multi_breakdown")
+        fn = lambda : tk_multi_breakdown.show_dialog(self)
+        self.engine.execute_in_main_thread(fn)
+        
+        
+        
