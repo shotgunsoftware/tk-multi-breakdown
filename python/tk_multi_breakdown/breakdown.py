@@ -72,8 +72,9 @@ def get_breakdown_items():
                                          'type': 'PublishedFileType'},
                  'task': {'id': 4714, 'name': 'Comp', 'type': 'Task'},
                  'type': 'PublishedFile',
+                 'project': {'id': 234, 'name': 'Climp', 'type': 'Project'},
                  'version_number': 1},
-     'template': <Sgtk TemplatePath nuke_shot_render_pub_mono_dpx: >}
+     'template': <Sgtk TemplatePath nuke_shot_render_pub_mono_dpx>}
      
     :returns: See details above.
     """
@@ -162,6 +163,7 @@ def get_breakdown_items():
               "name",
               "task",
               "version_number",
+              "project"
               ]
 
     if tank.util.get_published_file_entity_type(app.tank) == "PublishedFile":

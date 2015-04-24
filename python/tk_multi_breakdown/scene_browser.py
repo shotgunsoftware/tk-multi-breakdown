@@ -30,18 +30,11 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
         browser_widget.BrowserWidget.__init__(self, parent)
 
     def get_data(self, data):
-
-        items = breakdown.get_breakdown_items()
-        
-        import pprint
-        
-        print "items: %s" % pprint.pformat(items)
-        
+        items = breakdown.get_breakdown_items()        
         return {"items": items, "show_red": data["show_red"], "show_green": data["show_green"] }
 
     def _make_row(self, first, second):
         return "<tr><td><b>%s</b>&nbsp;&nbsp;&nbsp;</td><td>%s</td></tr>" % (first, second)
-
 
     def process_result(self, result):
 
