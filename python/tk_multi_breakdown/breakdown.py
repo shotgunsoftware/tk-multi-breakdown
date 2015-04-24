@@ -81,15 +81,14 @@ def get_breakdown_items():
     global g_cached_sg_publish_data
     items = []
 
-    # perform the scene scanning in the main UI thread -
-    # a lot of apps are
+    # perform the scene scanning in the main UI thread - a lot of apps are sensitive to these
+    # types of operations happening in other threads.
     app = tank.platform.current_bundle()
     scene_objects = app.engine.execute_in_main_thread(app.execute_hook_method, "hook_scene_operations", "scan_scene")
-
     # returns a list of dictionaries, each dict being like this:
     # {"node": node_name, "type": "reference", "path": maya_path}
 
-    # scan scene and add all tank nodes to list
+
     for scene_object in scene_objects:
 
         node_name = scene_object.get("node")
@@ -116,10 +115,11 @@ def get_breakdown_items():
                         del(fields[key_name])
 
                 # we also want to normalize the eye field (this should probably be an abstract field!)
+                # note: we need to do this explicitly because the eye isn't abstract in the default 
+                # configs yet (which is incorrect!).
                 fields["eye"] = "%V"
                 
-                # now build the normalized path that we can use to find corresponding Shotgun published 
-                # files
+                # now build the normalized path that we can use to find corresponding Shotgun published files
                 normalized_path = matching_template.apply_fields(fields)
                 
                 item = {}
@@ -138,10 +138,6 @@ def get_breakdown_items():
     # note that we store (by convention) all things on a normalized sequence form in SG, e.g
     # all four-padded sequences are stored as '%04d' regardless if they have been published from
     # houdini, maya, nuke etc.
-    #
-    # todo: find out if we need to make adjustments to ensure the current "normalized" sequence
-    # pattern logic works in DCCs which are using non-%04d conventions, e.g. houdini.
-    #
     valid_paths = [ x.get("path") for x in items ]
 
     # check if we have the path in the cache
