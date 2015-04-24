@@ -149,7 +149,7 @@ class MultiBreakdown(Application):
             latest_version = breakdown_app.calculate_latest_version(i["template"], i["fields"])
             
             # if our current version is out of date, update it!
-            current_version = i["version"]
+            current_version = i["fields"]["version"]
             if latest_version > current_version:
                 
                 # make a fields dictionary representing the latest version
@@ -163,6 +163,7 @@ class MultiBreakdown(Application):
         :param curr_fields: A complete set of fields for the template
         :returns: The highest version number found
         """
+        tk_multi_breakdown = self.import_module("tk_multi_breakdown")
         return tk_multi_breakdown.calculate_latest_version(template, fields)
         
     def update_item(self, node_type, node_name, template, fields):
@@ -188,7 +189,7 @@ class MultiBreakdown(Application):
             latest_version = breakdown_app.calculate_latest_version(i["template"], i["fields"])
             
             # if our current version is out of date, update it!
-            current_version = i["version"]
+            current_version = i["fields"]["version"]
             if latest_version > current_version:
                 
                 # make a fields dictionary representing the latest version
@@ -210,7 +211,7 @@ class MultiBreakdown(Application):
         d["path"] = template.apply_fields(fields)
         
         # call out to hook
-        return self._app.execute_hook_method("hook_scene_operations", "update", items=[d])
+        return self.execute_hook_method("hook_scene_operations", "update", items=[d])
 
 
 
