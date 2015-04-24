@@ -125,6 +125,7 @@ class MultiBreakdown(Application):
                 
         return items
 
+
     def calculate_latest_version(self, template, fields):
         """
         Given a template and some fields, return the highest version number found on disk.
@@ -165,6 +166,7 @@ class MultiBreakdown(Application):
         """
         tk_multi_breakdown = self.import_module("tk_multi_breakdown")
         return tk_multi_breakdown.calculate_latest_version(template, fields)
+        
         
     def update_item(self, node_type, node_name, template, fields):
         """
