@@ -98,30 +98,30 @@ class MultiBreakdown(Application):
         Below is an example showing how to retrieve the scene breakdown and update all items
         that are not using the latest version.
         
-        # find the breakdown app instance
-        import sgtk
-        engine = sgtk.platform.current_engine()
-        breakdown_app = engine.apps["tk-multi-breakdown"]
+# find the breakdown app instance
+import sgtk
+engine = sgtk.platform.current_engine()
+breakdown_app = engine.apps["tk-multi-breakdown"]
+
+# get list of breakdown items
+items = breakdown_app.analyze_scene()
+
+# now loop over all items
+for item in items:
+
+    # get the latest version on disk
+    latest_version = breakdown_app.compute_highest_version(item["template"], item["fields"])
+    
+    # if our current version is out of date, update it!
+    current_version = item["fields"]["version"]
+    if latest_version > current_version:
         
-        # get list of breakdown items
-        items = breakdown_app.analyze_scene()
+        # make a fields dictionary representing the latest version
+        latest_fields = copy.copy(item["fields"])
+        latest_fields["version"] = latest_version
         
-        # now loop over all items
-        for item in items:
-        
-            # get the latest version on disk
-            latest_version = breakdown_app.compute_highest_version(item["template"], item["fields"])
-            
-            # if our current version is out of date, update it!
-            current_version = items["fields"]["version"]
-            if latest_version > current_version:
-                
-                # make a fields dictionary representing the latest version
-                latest_fields = copy.copy(item["fields"])
-                latest_fields["version"] = latest_version
-                
-                # request that the breakdown updates to the latest version
-                breakdown_app.update_item(item["node_type"], item["node_name"], item["template"], latest_fields)
+        # request that the breakdown updates to the latest version
+        breakdown_app.update_item(item["node_type"], item["node_name"], item["template"], latest_fields)
 
         
         
@@ -139,15 +139,15 @@ class MultiBreakdown(Application):
             
             if item["sg_data"]:
                 new_sg_data = {}
-                new_sg_data["id"] = i["sg_data"]["id"]
-                new_sg_data["type"] = i["sg_data"]["type"]
-                new_sg_data["code"] = i["sg_data"]["code"]
-                new_sg_data["entity"] = i["sg_data"]["entity"]
-                new_sg_data["task"] = i["sg_data"]["task"]
-                new_sg_data["published_file_type"] = i["sg_data"]["published_file_type"]
-                new_sg_data["name"] = i["sg_data"]["name"]
-                new_sg_data["project"] = i["sg_data"]["project"]
-                new_sg_data["version_number"] = i["sg_data"]["version_number"]
+                new_sg_data["id"] = item["sg_data"]["id"]
+                new_sg_data["type"] = item["sg_data"]["type"]
+                new_sg_data["code"] = item["sg_data"]["code"]
+                new_sg_data["task"] = item["sg_data"]["task"]
+                new_sg_data["name"] = item["sg_data"]["name"]
+                new_sg_data["entity"] = item["sg_data"]["entity"]
+                new_sg_data["project"] = item["sg_data"]["project"]
+                new_sg_data["version_number"] = item["sg_data"]["version_number"]
+                new_sg_data["published_file_type"] = item["sg_data"]["published_file_type"]
                 item["sg_data"] = new_sg_data
                 
         return items
