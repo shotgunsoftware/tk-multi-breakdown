@@ -74,9 +74,11 @@ class MultiBreakdown(Application):
                     'output': 'output',
                     'version': 1,
                     'width': 2048},
+         'template': <Sgtk TemplatePath nuke_shot_render_pub_mono_dpx>,
+         
          'node_name': 'Read2',
          'node_type': 'Read',
-         'path': u'/mnt/projects/climp/sequences/aaa/aaa_00010/Comp/publish/elements/test/v001/2048x1556/aaa_00010_test_output_v001.%04d.dpx',
+         
          'sg_data': {'code': 'aaa_00010_test_output_v001.%04d.dpx',
                      'entity': {'id': 1660, 'name': 'aaa_00010', 'type': 'Shot'},
                      'id': 1424,
@@ -88,16 +90,40 @@ class MultiBreakdown(Application):
                      'type': 'PublishedFile',
                      'project': {'id': 234, 'name': 'Climp', 'type': 'Project'},
                      'version_number': 1},
-         'template': <Sgtk TemplatePath nuke_shot_render_pub_mono_dpx>}
+         }
         
         This method will attempt to connect to shotgun, but the number of calls made are
         constant and independent of the scene complexity.
         
-        You typically use it like this:
+        Below is an example showing how to retrieve the scene breakdown and update all items
+        that are not using the latest version.
         
-        >>> import sgtk
-        >>> e = sgtk.platform.current_engine()
-        >>> items = e.apps["tk-multi-breakdown"].analyze_scene()
+        # find the breakdown app instance
+        import sgtk
+        engine = sgtk.platform.current_engine()
+        breakdown_app = engine.apps["tk-multi-breakdown"]
+        
+        # get list of breakdown items
+        items = breakdown_app.analyze_scene()
+        
+        # now loop over all items
+        for item in items:
+        
+            # get the latest version on disk
+            latest_version = breakdown_app.calculate_latest_version(item["template"], item["fields"])
+            
+            # if our current version is out of date, update it!
+            current_version = items["fields"]["version"]
+            if latest_version > current_version:
+                
+                # make a fields dictionary representing the latest version
+                latest_fields = copy.copy(item["fields"])
+                latest_fields["version"] = latest_version
+                
+                # request that the breakdown updates to the latest version
+                breakdown_app.update_item(item["node_type"], item["node_name"], item["template"], latest_fields)
+
+        
         
         :returns: List of dictionaries, see above for example.
         """
@@ -109,8 +135,9 @@ class MultiBreakdown(Application):
         # if shotgun data is returned for an item, trim this down
         # to return a more basic listing than the one returned
         # from get_breakdown_items:
-        for i in items:
-            if i["sg_data"]:
+        for item in items:
+            
+            if item["sg_data"]:
                 new_sg_data = {}
                 new_sg_data["id"] = i["sg_data"]["id"]
                 new_sg_data["type"] = i["sg_data"]["type"]
@@ -121,7 +148,7 @@ class MultiBreakdown(Application):
                 new_sg_data["name"] = i["sg_data"]["name"]
                 new_sg_data["project"] = i["sg_data"]["project"]
                 new_sg_data["version_number"] = i["sg_data"]["version_number"]
-                i["sg_data"] = new_sg_data
+                item["sg_data"] = new_sg_data
                 
         return items
 
@@ -133,35 +160,10 @@ class MultiBreakdown(Application):
         
         This will perform a scan on disk to determine the highest version.
         
-        You typically use this in conjunction with the analyze_scene() method. 
-        For example:
-        
-        import sgtk
-        e = sgtk.platform.current_engine()
-        breakdown_app = e.apps["tk-multi-breakdown"]
-        
-        # get list of breakdown items
-        items = breakdown_app.analyze_scene()
-        
-        # now loop over all items
-        for i in items:
-        
-            # get the latest version on disk
-            latest_version = breakdown_app.calculate_latest_version(i["template"], i["fields"])
-            
-            # if our current version is out of date, update it!
-            current_version = i["fields"]["version"]
-            if latest_version > current_version:
-                
-                # make a fields dictionary representing the latest version
-                latest_fields = copy.copy(i["fields"])
-                latest_fields["version"] = latest_version
-                
-                # request that the breakdown updates to the latest version
-                breakdown_app.update_item(i["node_type"], i["node_name"], i["template"], latest_fields)
+        For a usage example, see the analyze_scene() method.
          
         :param template: Template object to calculate for
-        :param curr_fields: A complete set of fields for the template
+        :param fields: A complete set of fields for the template
         :returns: The highest version number found
         """
         tk_multi_breakdown = self.import_module("tk_multi_breakdown")
@@ -174,46 +176,21 @@ class MultiBreakdown(Application):
         This is similar to running the update in the breakdown UI. The actual 
         update call will be dispatched to a hook which handles the DCC specific logic.
         
-        You typically use this in conjunction with the analyze_scene() method. 
-        For example:
-        
-        import sgtk
-        e = sgtk.platform.current_engine()
-        breakdown_app = e.apps["tk-multi-breakdown"]
-        
-        # get list of breakdown items
-        items = breakdown_app.analyze_scene()
-        
-        # now loop over all items
-        for i in items:
-        
-            # get the latest version on disk
-            latest_version = breakdown_app.calculate_latest_version(i["template"], i["fields"])
-            
-            # if our current version is out of date, update it!
-            current_version = i["fields"]["version"]
-            if latest_version > current_version:
+        For a usage example, see the analyze_scene() method.
                 
-                # make a fields dictionary representing the latest version
-                latest_fields = copy.copy(i["fields"])
-                latest_fields["version"] = latest_version
-                
-                # request that the breakdown updates to the latest version
-                breakdown_app.update_item(i["node_type"], i["node_name"], i["template"], latest_fields)
-        
-        :param node_type: Note type of the item to update, as returned by analyze_scene()
-        :param node_name: Note name of the item to update, as returned by analyze_scene()
+        :param node_type: Node type of the item to update, as returned by analyze_scene()
+        :param node_name: Node name of the item to update, as returned by analyze_scene()
         :param template: Template object representing the path pattern to update
         :param fields: Fields dictionary representing the values to apply to the template in order
                        to render an valid and existing path on disk that the system can update to.
         """
-        d = {}
-        d["node"] = node_name
-        d["type"] = node_type
-        d["path"] = template.apply_fields(fields)
+        item = {}
+        item["node"] = node_name
+        item["type"] = node_type
+        item["path"] = template.apply_fields(fields)
         
         # call out to hook
-        return self.execute_hook_method("hook_scene_operations", "update", items=[d])
+        return self.execute_hook_method("hook_scene_operations", "update", items=[item])
 
 
 

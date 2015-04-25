@@ -60,7 +60,6 @@ def get_breakdown_items():
                 'width': 2048},
      'node_name': 'Read2',
      'node_type': 'Read',
-     'path': u'/mnt/projects/climp/sequences/aaa/aaa_00010/Comp/publish/elements/test/v001/2048x1556/aaa_00010_test_output_v001.%04d.dpx',
      'sg_data': {'code': 'aaa_00010_test_output_v001.%04d.dpx',
                  'entity': {'id': 1660, 'name': 'aaa_00010', 'type': 'Shot'},
                  'entity.Asset.sg_asset_type': None,
@@ -134,7 +133,7 @@ def get_breakdown_items():
                 # store the normalized fields in dict
                 items.append(item)
 
-    # now now do a second pass on all the files that are valid to see if they are published
+    # now do a second pass on all the files that are valid to see if they are published
     # note that we store (by convention) all things on a normalized sequence form in SG, e.g
     # all four-padded sequences are stored as '%04d' regardless if they have been published from
     # houdini, maya, nuke etc.
@@ -174,10 +173,14 @@ def get_breakdown_items():
         # cache item
         g_cached_sg_publish_data[path] = sg_chunk
 
-        # change type from valid -> publish
+        # append the sg data to the right path
         for item in items:
             if item.get("path") == path:
                 item["sg_data"] = sg_chunk
+
+    # we no longer need the path key in the dict, so get rid of it
+    for item in items:
+        del item["path"]
 
     return items
 
@@ -203,8 +206,9 @@ def calculate_latest_version(template, curr_fields):
     # need to fix this in Tank platform
 
     # get all eyes, all frames and all versions
-    # potentially a HUGE glob, so may be really SUPER SLOW...
+    # potentially a HUGE glob, so may be slow...
     # todo: better support for sequence iterations
+    #       by using the abstract iteration methods
     
     # first, find all abstract (Sequence) keys from the template:
     abstract_keys = set()
