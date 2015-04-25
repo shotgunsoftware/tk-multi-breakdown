@@ -185,7 +185,7 @@ def get_breakdown_items():
     return items
 
 
-def calculate_latest_version(template, curr_fields):
+def compute_highest_version(template, curr_fields):
     """
     Given a template and some fields, return the highest version number found on disk.
     The template key containing the version number is assumed to be named {version}.

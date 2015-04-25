@@ -110,7 +110,7 @@ class MultiBreakdown(Application):
         for item in items:
         
             # get the latest version on disk
-            latest_version = breakdown_app.calculate_latest_version(item["template"], item["fields"])
+            latest_version = breakdown_app.compute_highest_version(item["template"], item["fields"])
             
             # if our current version is out of date, update it!
             current_version = items["fields"]["version"]
@@ -153,7 +153,7 @@ class MultiBreakdown(Application):
         return items
 
 
-    def calculate_latest_version(self, template, fields):
+    def compute_highest_version(self, template, fields):
         """
         Given a template and some fields, return the highest version number found on disk.
         The template key containing the version number is assumed to be named {version}.
@@ -167,7 +167,7 @@ class MultiBreakdown(Application):
         :returns: The highest version number found
         """
         tk_multi_breakdown = self.import_module("tk_multi_breakdown")
-        return tk_multi_breakdown.calculate_latest_version(template, fields)
+        return tk_multi_breakdown.compute_highest_version(template, fields)
         
         
     def update_item(self, node_type, node_name, template, fields):

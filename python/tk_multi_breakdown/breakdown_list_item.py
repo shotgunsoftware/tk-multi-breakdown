@@ -123,7 +123,7 @@ class BreakdownListItem(browser_widget.ListItem):
 
 
         # first, get the latest available version for this item
-        latest_version = breakdown.calculate_latest_version(self._template, self._fields)
+        latest_version = breakdown.compute_highest_version(self._template, self._fields)
 
         current_version = self._fields["version"]
         output["up_to_date"] = (latest_version == current_version)
