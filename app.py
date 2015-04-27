@@ -98,30 +98,30 @@ class MultiBreakdown(Application):
         Below is an example showing how to retrieve the scene breakdown and update all items
         that are not using the latest version.
         
-# find the breakdown app instance
-import sgtk
-engine = sgtk.platform.current_engine()
-breakdown_app = engine.apps["tk-multi-breakdown"]
-
-# get list of breakdown items
-items = breakdown_app.analyze_scene()
-
-# now loop over all items
-for item in items:
-
-    # get the latest version on disk
-    latest_version = breakdown_app.compute_highest_version(item["template"], item["fields"])
-    
-    # if our current version is out of date, update it!
-    current_version = item["fields"]["version"]
-    if latest_version > current_version:
+        # find the breakdown app instance
+        import sgtk
+        engine = sgtk.platform.current_engine()
+        breakdown_app = engine.apps["tk-multi-breakdown"]
         
-        # make a fields dictionary representing the latest version
-        latest_fields = copy.copy(item["fields"])
-        latest_fields["version"] = latest_version
+        # get list of breakdown items
+        items = breakdown_app.analyze_scene()
         
-        # request that the breakdown updates to the latest version
-        breakdown_app.update_item(item["node_type"], item["node_name"], item["template"], latest_fields)
+        # now loop over all items
+        for item in items:
+        
+            # get the latest version on disk
+            latest_version = breakdown_app.compute_highest_version(item["template"], item["fields"])
+            
+            # if our current version is out of date, update it!
+            current_version = item["fields"]["version"]
+            if latest_version > current_version:
+                
+                # make a fields dictionary representing the latest version
+                latest_fields = copy.copy(item["fields"])
+                latest_fields["version"] = latest_version
+                
+                # request that the breakdown updates to the latest version
+                breakdown_app.update_item(item["node_type"], item["node_name"], item["template"], latest_fields)
 
         
         
