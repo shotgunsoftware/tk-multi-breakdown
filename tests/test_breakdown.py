@@ -23,12 +23,18 @@ from tank.deploy import descriptor
 
 
 class TestApplication(TankTestBase):
+    """
+    General fixtures class for testing Toolkit apps
+    """
     
     def setUp(self):
+        """
+        Fixtures setup
+        """
         super(TestApplication, self).setUp()
         self.setup_fixtures()
         
-        # set up a path to the folder above the breakdown folder
+        # set up a path to the folder above the app folder
         # this is so that the breakdown and all its frameworks can be loaded in
         # it is assumed that you have all the dependent packages in a structure under this 
         # root point, like this:
@@ -42,8 +48,7 @@ class TestApplication(TankTestBase):
         # 
         os.environ["BUNDLE_ROOT"] = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", ".."))
         
-        # set up a sequence/shot/step
-        # and run folder creation
+        # set up a standard sequence/shot/step and run folder creation
         self.seq = {"type": "Sequence",
                     "id": 2,
                     "code": "seq_code",
@@ -64,19 +69,47 @@ class TestApplication(TankTestBase):
                      "step": self.step,
                      "project": self.project}
 
-        entities = [self.shot, self.seq, self.step, self.project, self.task]
-
-        
         # Add these to mocked shotgun
-        self.add_to_sg_mock_db(entities)
+        self.add_to_sg_mock_db([self.shot, self.seq, self.step, self.project, self.task])
 
-        # run folder creation
+        # run folder creation for the shot
         self.tk.create_filesystem_structure(self.shot["type"], self.shot["id"])
         
         # now make a context
         context = self.tk.context_from_entity(self.shot["type"], self.shot["id"])
+                        
+        # and start the engine
+        self.engine = tank.platform.start_engine("test_engine", self.tk, context)
         
+    def tearDown(self):
+        """
+        Fixtures teardown
+        """
+        # engine is held as global, so must be destroyed.
+        cur_engine = tank.platform.current_engine()
+        if cur_engine:
+            cur_engine.destroy()
         
+        # important to call base class so it can clean up memory
+        super(TestApplication, self).tearDown()
+
+    
+    
+class TestApi(TestApplication):
+    """
+    Tests for the Breakdown App's API interface
+    """
+    
+    def setUp(self):
+        """
+        Fixtures setup
+        """        
+        super(TestApi, self).setUp()
+        
+        # short hand for the app
+        self.app = self.engine.apps["tk-multi-breakdown"]
+        
+        # set up some test data
         self.test_path_1 = os.path.join(self.project_root, 
                                    "sequences", 
                                    self.seq["code"], 
@@ -101,40 +134,27 @@ class TestApplication(TankTestBase):
         fh.write("hello")
         fh.close()
 
+        # this will be read by our hook so push
+        # it out into env vars...
         os.environ["TEST_PATH_1"] = self.test_path_1
         os.environ["TEST_PATH_2"] = self.test_path_2
         
         
-        # and start the engine
-        self.engine = tank.platform.start_engine("test_engine", self.tk, context)
-
-        
-    def tearDown(self):
-                
-        # engine is held as global, so must be destroyed.
-        cur_engine = tank.platform.current_engine()
-        if cur_engine:
-            cur_engine.destroy()
-        
-        # important to call base class so it can clean up memory
-        super(TestApplication, self).tearDown()
-
-    
-    
-class TestApi(TestApplication):
-
-    def setUp(self):
-        super(TestApi, self).setUp()
-        self.app = self.engine.apps["tk-multi-breakdown"]
-        
     def test_analyze_scene(self):
-        
+        """
+        Tests the analyze_scene method
+        """
         scene_data = self.app.analyze_scene()
         self.assertEqual(len(scene_data), 1)
         
         item = scene_data[0]
-        
-        self.assertEqual(item["fields"], {'Shot': 'shot_code', 'name': 'foo', 'Sequence': 'seq_code', 'Step': 'step_short_name', 'version': 3, 'maya_extension': 'ma', 'eye': '%V'})
+        self.assertEqual(item["fields"], {'Shot': 'shot_code', 
+                                          'name': 'foo', 
+                                          'Sequence': 'seq_code', 
+                                          'Step': 'step_short_name', 
+                                          'version': 3, 
+                                          'maya_extension': 'ma', 
+                                          'eye': '%V'})
         self.assertEqual(item["node_name"], "maya_publish")
         self.assertEqual(item["node_type"], "TestNode")
         self.assertEqual(item["template"], self.tk.templates["maya_shot_publish"])
@@ -142,38 +162,38 @@ class TestApi(TestApplication):
         
         
     def test_compute_highest_version(self):
-        
-        
+        """
+        Tests the version computation logic
+        """
         scene_data = self.app.analyze_scene()
-        
-        
-        item = scene_data[0]
-        
+        item = scene_data[0]        
+        # test logic
         self.assertEqual(self.app.compute_highest_version(item["template"], item["fields"]), 4)
-        
+        # test bad data
         self.assertRaises(TankError, 
                           self.app.compute_highest_version, 
                           self.tk.templates["maya_asset_publish"], 
                           item["fields"])
         
     def test_update(self):
-
-
+        """
+        Test scene update
+        """
         scene_data = self.app.analyze_scene()
-        
         item = scene_data[0]
         
+        # increment version
         fields = item["fields"]
-        template = item["template"]
-        
         fields["version"] = 4
 
+        # clear temp location where hook writes to
         tank._hook_items = None
         
+        # execute hook
         self.app.update_item(item["node_type"], item["node_name"], item["template"], fields)        
         
+        # check result
         self.assertEqual(len(tank._hook_items), 1)
-        
         self.assertEqual(tank._hook_items[0]["node"], "maya_publish")
         self.assertEqual(tank._hook_items[0]["path"], self.test_path_2)
         self.assertEqual(tank._hook_items[0]["type"], "TestNode")
