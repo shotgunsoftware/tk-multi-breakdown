@@ -28,6 +28,20 @@ class TestApplication(TankTestBase):
         super(TestApplication, self).setUp()
         self.setup_fixtures()
         
+        # set up a path to the folder above the breakdown folder
+        # this is so that the breakdown and all its frameworks can be loaded in
+        # it is assumed that you have all the dependent packages in a structure under this 
+        # root point, like this:
+        #
+        # bundle_root
+        #    |
+        #    |- tk-multi-breakdown
+        #    |- tk-framework-qtwidgets
+        #    \- tk-framework-shotgunutils
+        #
+        # 
+        os.environ["BUNDLE_ROOT"] = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", ".."))
+        
         # set up a sequence/shot/step
         # and run folder creation
         self.seq = {"type": "Sequence",
@@ -52,9 +66,7 @@ class TestApplication(TankTestBase):
 
         entities = [self.shot, self.seq, self.step, self.project, self.task]
 
-        # set up a path to this app 
-        os.environ["BUNDLE_ROOT"] = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", ".."))
-
+        
         # Add these to mocked shotgun
         self.add_to_sg_mock_db(entities)
 
@@ -63,6 +75,35 @@ class TestApplication(TankTestBase):
         
         # now make a context
         context = self.tk.context_from_entity(self.shot["type"], self.shot["id"])
+        
+        
+        self.test_path_1 = os.path.join(self.project_root, 
+                                   "sequences", 
+                                   self.seq["code"], 
+                                   self.shot["code"], 
+                                   self.step["short_name"], 
+                                   "publish", 
+                                   "foo.v003.ma")
+
+        self.test_path_2 = os.path.join(self.project_root,  
+                                   "sequences", 
+                                   self.seq["code"], 
+                                   self.shot["code"], 
+                                   self.step["short_name"], 
+                                   "publish", 
+                                   "foo.v004.ma")
+
+        fh = open(self.test_path_1, "wt")
+        fh.write("hello")
+        fh.close()
+        
+        fh = open(self.test_path_2, "wt")
+        fh.write("hello")
+        fh.close()
+
+        os.environ["TEST_PATH_1"] = self.test_path_1
+        os.environ["TEST_PATH_2"] = self.test_path_2
+        
         
         # and start the engine
         self.engine = tank.platform.start_engine("test_engine", self.tk, context)
@@ -86,11 +127,55 @@ class TestApi(TestApplication):
         super(TestApi, self).setUp()
         self.app = self.engine.apps["tk-multi-breakdown"]
         
-    def test_get_setting(self):
-        # Test that app is able to locate a template based on the template name
-        print self.app
-        self.assertEqual(self.app.name, "tk-multi-breakdown")
-
+    def test_analyze_scene(self):
         
-        # test resource
-    
+        scene_data = self.app.analyze_scene()
+        self.assertEqual(len(scene_data), 1)
+        
+        item = scene_data[0]
+        
+        self.assertEqual(item["fields"], {'Shot': 'shot_code', 'name': 'foo', 'Sequence': 'seq_code', 'Step': 'step_short_name', 'version': 3, 'maya_extension': 'ma', 'eye': '%V'})
+        self.assertEqual(item["node_name"], "maya_publish")
+        self.assertEqual(item["node_type"], "TestNode")
+        self.assertEqual(item["template"], self.tk.templates["maya_shot_publish"])
+        self.assertEqual(item["sg_data"], None)
+        
+        
+    def test_compute_highest_version(self):
+        
+        
+        scene_data = self.app.analyze_scene()
+        
+        
+        item = scene_data[0]
+        
+        self.assertEqual(self.app.compute_highest_version(item["template"], item["fields"]), 4)
+        
+        self.assertRaises(TankError, 
+                          self.app.compute_highest_version, 
+                          self.tk.templates["maya_asset_publish"], 
+                          item["fields"])
+        
+    def test_update(self):
+
+
+        scene_data = self.app.analyze_scene()
+        
+        item = scene_data[0]
+        
+        fields = item["fields"]
+        template = item["template"]
+        
+        fields["version"] = 4
+
+        tank._hook_items = None
+        
+        self.app.update_item(item["node_type"], item["node_name"], item["template"], fields)        
+        
+        self.assertEqual(len(tank._hook_items), 1)
+        
+        self.assertEqual(tank._hook_items[0]["node"], "maya_publish")
+        self.assertEqual(tank._hook_items[0]["path"], self.test_path_2)
+        self.assertEqual(tank._hook_items[0]["type"], "TestNode")
+        
+                
