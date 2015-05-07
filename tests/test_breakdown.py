@@ -23,30 +23,48 @@ from tank.deploy import descriptor
 
 
 class TestApplication(TankTestBase):
+    
     def setUp(self):
         super(TestApplication, self).setUp()
         self.setup_fixtures()
         
-        # setup shot
-        seq = {"type":"Sequence", "code": "seq_name", "id":3 }
-        seq_path = os.path.join(self.project_root, "sequences/Seq/seq_name")
-        self.add_production_path(seq_path, seq)
-        
-        shot = {"type":"Shot", "code": "shot_name", "id":2, "sg_sequence": seq, "project": self.project}
-        shot_path = os.path.join(seq_path, "shot_name")
-        self.add_production_path(shot_path, shot)
-        
-        step = {"type":"Step", "code": "step_name", "id":4 }
-        self.shot_step_path = os.path.join(shot_path, "step_name")
-        self.add_production_path(self.shot_step_path, step)
+        # set up a sequence/shot/step
+        # and run folder creation
+        self.seq = {"type": "Sequence",
+                    "id": 2,
+                    "code": "seq_code",
+                    "project": self.project}
+        self.shot = {"type": "Shot",
+                     "id": 1,
+                     "code": "shot_code",
+                     "sg_sequence": self.seq,
+                     "project": self.project}
+        self.step = {"type": "Step",
+                     "id": 3,
+                     "code": "step_code",
+                     "entity_type": "Shot",
+                     "short_name": "step_short_name"}
+        self.task = {"type": "Task",
+                     "id": 23,
+                     "entity": self.shot,
+                     "step": self.step,
+                     "project": self.project}
 
-        self.test_resource = os.path.join(self.pipeline_config_root, "config", "foo", "bar.png")
-        os.makedirs(os.path.dirname(self.test_resource))
-        fh = open(self.test_resource, "wt")
-        fh.write("test")
-        fh.close()
+        entities = [self.shot, self.seq, self.step, self.project, self.task]
+
+        # set up a path to this app 
+        os.environ["APP_PATH"] = os.path.abspath(os.path.join( os.path.dirname(__file__), ".."))
+
+        # Add these to mocked shotgun
+        self.add_to_sg_mock_db(entities)
+
+        # run folder creation
+        self.tk.create_filesystem_structure(self.shot["type"], self.shot["id"])
         
-        context = self.tk.context_from_path(self.shot_step_path)
+        # now make a context
+        context = self.tk.context_from_entity(self.shot["type"], self.shot["id"])
+        
+        # and start the engine
         self.engine = tank.platform.start_engine("test_engine", self.tk, context)
 
         
@@ -56,40 +74,17 @@ class TestApplication(TankTestBase):
         cur_engine = tank.platform.current_engine()
         if cur_engine:
             cur_engine.destroy()
-        os.remove(self.test_resource)
-
+        
         # important to call base class so it can clean up memory
         super(TestApplication, self).tearDown()
 
+    
+    
+class TestApi(TestApplication):
 
-class TestGetApplication(TestApplication):
-    def test_bad_app_path(self):
-        bogus_path = os.path.join(self.tank_temp, "bogus_path")
-        
-        self.assertRaises(TankError,
-                          application.get_application,
-                          self.engine, bogus_path, "bogus_app", {}, "instance_name", None)
-        
-        try:
-            application.get_application(self.engine, bogus_path, "bogus_app", {}, "instance_name", None)
-        except TankError, cm:
-            expected_msg = "Failed to load plugin"
-            self.assertTrue(cm.message.startswith(expected_msg))
-        
-    def test_good_path(self):
-        app_path = os.path.join(self.project_config, "test_app")
-        # make a dev location and create descriptor
-        app_desc = descriptor.get_from_location(descriptor.AppDescriptor.APP, 
-                                                self.tk.pipeline_configuration, 
-                                                {"type": "dev", "path": app_path})
-        result = application.get_application(self.engine, app_path, app_desc, {}, "instance_name", None)
-        self.assertIsInstance(result, application.Application)
-        
-
-class TestGetSetting(TestApplication):
     def setUp(self):
-        super(TestGetSetting, self).setUp()
-        self.app = self.engine.apps["test_app"]
+        super(TestApi, self).setUp()
+        self.app = self.engine.apps["tk-multi-breakdown"]
         
     def test_get_setting(self):
         # Test that app is able to locate a template based on the template name
@@ -98,166 +93,4 @@ class TestGetSetting(TestApplication):
         self.assertIsInstance(tmpl, Template)
         
         # test resource
-        self.assertEqual(self.test_resource, self.app.get_setting("test_icon"))
-        
-        # Test a simple list
-        test_list = self.app.get_setting("test_simple_list")
-        self.assertEqual(4, len(test_list))
-        self.assertEqual("a", test_list[0])
-        
-        # Test a complex list
-        test_list = self.app.get_setting("test_complex_list")
-        test_item = test_list[0]
-        
-        self.assertEqual(2, len(test_list))
-        self.assertEqual("a", test_item["test_str"])
-        self.assertEqual(1, test_item["test_int"])
-        self.assertEqual(1.1, test_item["test_float"])
-        self.assertEqual(True, test_item["test_bool"])
-        self.assertEqual("extra", test_item["test_extra"])
-
-class TestExecuteHookByName(TestApplication):
     
-
-    def test_legacy_format_old_method(self):
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook_by_name("named_hook", dummy_param=True), "named_hook_1")
-
-    def test_legacy_format(self):
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook_expression("named_hook", "execute", dummy_param=True), "named_hook_1")
-
-    def test_legacy_format_2(self):
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook_expression("named_hook", "second_method", another_dummy_param=True), 
-                         "named_hook_2")
-
-    def test_config(self):
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook_expression("{config}/named_hook.py", "execute", dummy_param=True), 
-                         "named_hook_1")
-
-    def test_self(self):
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook_expression("{self}/test_hook.py", "execute", dummy_param=True), 
-                        "named_hook_1")
-
-
-class TestExecuteHook(TestApplication):
-    
-
-    def test_standard_format(self):
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook("test_hook_std", dummy_param=True))
-
-    def test_custom_method(self):
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook_method("test_hook_std", "second_method", another_dummy_param=True))
-
-    def test_self_format(self):
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook("test_hook_self", dummy_param=True))
-
-    def test_config_format(self):
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook("test_hook_config", dummy_param=True))
-
-    def test_default_format(self):
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook("test_hook_default", dummy_param=True))
-
-    def test_env_var_format(self):
-        app = self.engine.apps["test_app"]
-        shutil.copy( os.path.join(app.disk_location, "hooks", "test_hook.py"), 
-                     os.path.join(self.project_root, "test_env_var_hook.py"))
-        os.environ["TEST_ENV_VAR"] = self.project_root
-        
-        self.assertTrue(app.execute_hook("test_hook_env_var", dummy_param=True))
-
-    def test_inheritance(self):
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook_method("test_hook_inheritance_1", "foo", bar=True), "base class")
-
-    def test_inheritance_2(self):
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook_method("test_hook_inheritance_2", "foo2", bar=True), "custom class base class")
-        
-    def test_inheritance_old_style(self):
-        """
-        Test that a hook that contains multiple levels of derivation works as long as there is only one leaf
-        level class 
-        """
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.execute_hook("test_hook_inheritance_old_style", dummy_param=True), "doubly derived class")
-
-    def test_inheritance_old_style_fails(self):
-        """
-        Test that a hook file that contains multiple levels of derivation raises a TankError when there 
-        are multiple leaf level classes derived from 'Hook'
-        """
-        app = self.engine.apps["test_app"]
-        self.assertRaises(TankError, 
-                         app.execute_hook,
-                         "test_hook_inheritance_old_style_fails", dummy_param=True)
-        
-    def test_new_style_config_old_style_hook(self):
-        app = self.engine.apps["test_app"]        
-        self.assertTrue(app.execute_hook("test_hook_new_style_config_old_style_hook", dummy_param=True))
-
-    def test_default_syntax_with_new_style_hook(self):
-        app = self.engine.apps["test_app"]        
-        self.assertTrue(app.execute_hook("test_default_syntax_with_new_style_hook", dummy_param=True))
-
-    def test_default_syntax_missing_implementation(self):
-        """
-        Test the case when the default hook defined in the manifest is missing.
-        This is common when using the {engine_name} token and a user is trying
-        to create a hook which supports an engine which the app does not yet support.  
-        """
-        app = self.engine.apps["test_app"]                
-        self.assertEqual(app.execute_hook_method("test_default_syntax_missing_implementation", "test_method"), "hello")
-        
-
-class TestRequestFolder(TestApplication):
-    
-    def test_request_folder(self):
-        app = self.engine.apps["test_app"]
-        
-        path = os.path.join( tempfile.gettempdir(), "tank_unit_test_test_request_folder")
-    
-        self.assertFalse(os.path.exists(path))
-        app.ensure_folder_exists(path)
-        self.assertTrue(os.path.exists(path))
-        os.rmdir(path)
-
-class TestHookCache(TestApplication):
-    """
-    Check that the hooks cache is cleared when an engine is restarted.
-    """
-    def test_call_hook(self):
-        
-        tank.hook.clear_hooks_cache()
-        self.assertTrue(len(tank.hook._hooks_cache) == 0)
-        app = self.engine.apps["test_app"]
-        self.assertTrue(app.execute_hook("test_hook_std", dummy_param=True))
-        self.assertTrue(len(tank.hook._hooks_cache) == 1)
-        self.engine.destroy()
-        self.assertTrue(len(tank.hook._hooks_cache) == 0)
-
-
-
-
-class TestProperties(TestApplication):
-
-
-    def test_properties(self):
-        """
-        test engine properties
-        """
-        app = self.engine.apps["test_app"]
-        self.assertEqual(app.name, "test_app")
-        self.assertEqual(app.display_name, "Test App")
-        self.assertEqual(app.version, "Undefined")
-        self.assertEqual(app.documentation_url, None)
-        
-
