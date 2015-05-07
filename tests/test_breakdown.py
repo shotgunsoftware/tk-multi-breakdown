@@ -53,7 +53,7 @@ class TestApplication(TankTestBase):
         entities = [self.shot, self.seq, self.step, self.project, self.task]
 
         # set up a path to this app 
-        os.environ["APP_PATH"] = os.path.abspath(os.path.join( os.path.dirname(__file__), ".."))
+        os.environ["BUNDLE_ROOT"] = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", ".."))
 
         # Add these to mocked shotgun
         self.add_to_sg_mock_db(entities)
@@ -88,9 +88,9 @@ class TestApi(TestApplication):
         
     def test_get_setting(self):
         # Test that app is able to locate a template based on the template name
-        tmpl = self.app.get_template("test_template")
-        self.assertEqual("maya_publish_name", tmpl.name)
-        self.assertIsInstance(tmpl, Template)
+        print self.app
+        self.assertEqual(self.app.name, "tk-multi-breakdown")
+
         
         # test resource
     
