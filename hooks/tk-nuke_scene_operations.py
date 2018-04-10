@@ -10,7 +10,17 @@
 
 import os
 import nuke
+import hiero.core
+from hiero.core import newProject
+from hiero.core import BinItem
+from hiero.core import MediaSource
+from hiero.core import Clip
+from hiero.core import Sequence
+from hiero.core import VideoTrack
 from tank import Hook
+import sgtk
+logger = sgtk.platform.get_logger(__name__)
+
 
 class BreakdownSceneOperations(Hook):
     """
@@ -39,9 +49,31 @@ class BreakdownSceneOperations(Hook):
         Toolkit will scan the list of items, see if any of the objects matches
         any templates and try to determine if there is a more recent version
         available. Any such versions are then displayed in the UI as out of date.
+    
         """
 
         reads = []
+
+        myProject = hiero.core.projects()
+        for i in myProject :
+           
+            #-------------------Defiene Hiero var----------------
+            myPro = i
+            clipsBin = myPro.clipsBin()
+            clips = clipsBin.clips()
+            #-------------------Defiene Hiero var----------------
+            
+            #-------------------------Pull Hiero Path in reads--------------------------
+            for clip in clips:
+                zec = clip.activeItem()
+                mediaSource = zec.mediaSource()
+                files = mediaSource.fileinfos()
+                for file in files:
+                    path = file.filename().replace("/", os.path.sep)
+                    reads.append( {"node": zec, "type": "Clip", "path": path})
+            
+    
+
 
         # first let's look at the read nodes
         for node in nuke.allNodes("Read"):
@@ -53,6 +85,7 @@ class BreakdownSceneOperations(Hook):
             path = node.knob('file').value().replace("/", os.path.sep)
 
             reads.append( {"node": node_name, "type": "Read", "path": path})
+            logger.debug("inside my code, i can log like thiszzzzz")
 
         # then the read geometry nodes    
         for node in nuke.allNodes("ReadGeo2"):
@@ -86,6 +119,7 @@ class BreakdownSceneOperations(Hook):
         engine = self.parent.engine
 
         node_type_list = ["Read", "ReadGeo2", "Camera2"]
+        node_type_list_s = ["Clip"]
         for i in items:
             node_name = i["node"]
             node_type = i["type"]
@@ -97,4 +131,11 @@ class BreakdownSceneOperations(Hook):
                 # make sure slashes are handled correctly - always forward
                 new_path = new_path.replace(os.path.sep, "/")
                 node.knob("file").setValue(new_path)
+
+            if node_type in node_type_list_s :
+                engine.log_debug("Node %s: Updating to version %s" % (node_name, new_path))
+                clip = node_name
+                # make sure slashes are handled correctly - always forward
+                new_path = new_path.replace(os.path.sep, "/")
+                clip.reconnectMedia(new_path)
 
