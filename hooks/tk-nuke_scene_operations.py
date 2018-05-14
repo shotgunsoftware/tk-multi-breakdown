@@ -50,8 +50,8 @@ class BreakdownSceneOperations(HookBaseClass):
         # If we're in Nuke Studio or Hiero, we need to see if there are any
         # clips we need to be aware of that we might want to point to newer
         # publishes.
-        if self.parent.studio_enabled or self.parent.hiero_enabled:
-            import hiero.core
+        if self.parent.engine.studio_enabled or self.parent.engine.hiero_enabled:
+            import hiero
 
             for project in hiero.core.projects():
                 for clip in project.clipsBin().clips():
@@ -76,7 +76,6 @@ class BreakdownSceneOperations(HookBaseClass):
             path = node.knob('file').value().replace("/", os.path.sep)
 
             reads.append( {"node": node_name, "type": "Read", "path": path})
-            logger.debug("inside my code, i can log like thiszzzzz")
 
         # then the read geometry nodes    
         for node in nuke.allNodes("ReadGeo2"):
