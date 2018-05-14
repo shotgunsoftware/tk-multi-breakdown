@@ -66,6 +66,10 @@ class BreakdownSceneOperations(HookBaseClass):
                             )
                         )
 
+        # Hiero doesn't have nodes to check, so just return the clips.
+        if self.parent.engine.hiero_enabled:
+            return reads
+
         # first let's look at the read nodes
         for node in nuke.allNodes("Read"):
 
