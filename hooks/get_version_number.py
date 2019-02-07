@@ -22,7 +22,6 @@ class GetVersionNumber(HookBaseClass):
     Given a template and some fields, return the highest version number found on disk.
     The template key containing the version number is assumed to be named {version}.
     """
-
     def execute(self, template, curr_fields, **kwargs):
         """
         Main hook entry point.
@@ -33,9 +32,6 @@ class GetVersionNumber(HookBaseClass):
         :returns: The highest version number found
         :rtype: int
         """
-        # set up the payload
-        output = {}
-
         # calculate visibility
         # check if this is the latest item
 
