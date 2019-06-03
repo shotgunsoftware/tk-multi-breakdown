@@ -10,7 +10,6 @@
 
 from tank import Hook
 import maya.cmds as cmds
-import pymel.core as pm
 import os
 
 class BreakdownSceneOperations(Hook):
@@ -44,13 +43,10 @@ class BreakdownSceneOperations(Hook):
         refs = []
 
         # first let's look at maya references
-        for x in pm.listReferences():
-            node_name = x.refNode.longName()
-
-            # get the path and make it platform dependent
-            # (maya uses C:/style/paths)
-            maya_path = x.path.replace("/", os.path.sep)
-            refs.append( {"node": node_name, "type": "reference", "path": maya_path})
+        for node_name in (x for x in cmds.ls(references=True)
+                          if x not in cmds.ls(references=True, referencedNodes=True)):
+            maya_path = cmds.referenceQuery(node_name, filename=True).replace("/", os.path.sep)
+            refs.append({"node": node_name, "type": "reference", "path": maya_path})
 
         # now look at file texture nodes
         for file_node in cmds.ls(l=True, type="file"):
@@ -89,8 +85,7 @@ class BreakdownSceneOperations(Hook):
             if node_type == "reference":
                 # maya reference
                 engine.log_debug("Maya Reference %s: Updating to version %s" % (node, new_path))
-                rn = pm.system.FileReference(node)
-                rn.replaceWith(new_path)
+                cmds.file(new_path, loadReference=node)
 
             elif node_type == "file":
                 # file texture node
