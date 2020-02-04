@@ -103,7 +103,7 @@ class MariSceneOperations(Hook):
         try:
             fields = ["id", "path", "version_number"]
             found_publishes = sgtk.util.find_publish(self.parent.sgtk, all_paths, fields=fields)
-        except TankError, e:
+        except TankError as e:
             raise TankError("Failed to query publishes from Shotgun: %s" % e)
         
         # now we have all the info we need to update geometry:
