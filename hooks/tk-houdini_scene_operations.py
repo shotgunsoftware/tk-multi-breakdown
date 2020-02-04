@@ -56,7 +56,7 @@ class BreakdownSceneOperations(Hook):
             file_path = os.path.normpath(file_parm.eval())
 
             items.append(
-                {"node": alembic_node.path(), "type": "alembic", "path": file_path,}
+                {"node": alembic_node.path(), "type": "alembic", "path": file_path}
             )
 
         return items
