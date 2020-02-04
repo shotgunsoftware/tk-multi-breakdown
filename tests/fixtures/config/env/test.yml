@@ -1,6 +1,6 @@
 engines:
     test_engine:
-        location: {'type': 'dev', 'path': '{PIPELINE_CONFIG}/config/bundles/test_engine'}
+        location: {'type': 'dev', 'path': '{CONFIG_FOLDER}/bundles/test_engine'}
         debug_logging: false
 
         apps:
@@ -16,6 +16,8 @@ frameworks:
     location: {name: tk-framework-shotgunutils, type: dev, version: v2.0.10, path: '${BUNDLE_ROOT}/tk-framework-shotgunutils' }
   tk-framework-shotgunutils_v4.x.x:
     location: {name: tk-framework-shotgunutils, type: dev, version: v2.0.10, path: '${BUNDLE_ROOT}/tk-framework-shotgunutils' }
+  tk-framework-shotgunutils_v5.x.x:
+    location: {name: tk-framework-shotgunutils, type: dev, version: v5.7.2, path: '${BUNDLE_ROOT}/tk-framework-shotgunutils' }
   tk-framework-qtwidgets_v1.x.x:
     location: {name: tk-framework-qtwidgets, type: dev, version: v1.0.1, path: '${BUNDLE_ROOT}/tk-framework-qtwidgets' }
   tk-framework-qtwidgets_v2.x.x:
