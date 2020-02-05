@@ -5,14 +5,14 @@ engines:
 
         apps:
             tk-multi-breakdown:
-                location: {'type': 'dev', 'path': '$REPO_ROOT'}
+                location: {'type': 'dev', 'path': '$SHOTGUN_CURRENT_REPO_ROOT'}
                 hook_scene_operations: '{config}/scene_operations.py'
 
 
 frameworks:
   tk-framework-widget_v0.2.x:
-    location: {name: tk-framework-widget, type: dev, version: v0.2.33, path: '$SHOTGUN_REPOS_ROOT/tk-framework-widget' }
+    location: {type: dev, path: '$SHOTGUN_REPOS_ROOT/tk-framework-widget' }
   tk-framework-shotgunutils_v5.x.x:
-    location: {name: tk-framework-shotgunutils, type: dev, version: v5.7.2, path: '$SHOTGUN_REPOS_ROOT/tk-framework-shotgunutils' }
+    location: {type: dev, path: '$SHOTGUN_REPOS_ROOT/tk-framework-shotgunutils' }
   tk-framework-qtwidgets_v2.x.x:
-    location: {name: tk-framework-qtwidgets, type: dev, version: v1.0.1, path: '$SHOTGUN_REPOS_ROOT/tk-framework-qtwidgets' }
+    location: {type: dev, path: '$SHOTGUN_REPOS_ROOT/tk-framework-qtwidgets' }
