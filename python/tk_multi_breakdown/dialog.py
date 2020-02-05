@@ -10,7 +10,7 @@
 
 import copy
 
-from sgtk.platform.qt import QtCore, QtGui
+from sgtk.platform.qt import QtGui
 from .ui.dialog import Ui_Dialog
 
 

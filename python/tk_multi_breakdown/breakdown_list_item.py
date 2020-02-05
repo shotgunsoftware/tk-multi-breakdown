@@ -10,7 +10,7 @@
 
 
 import sgtk
-from sgtk.platform.qt import QtCore, QtGui
+from sgtk.platform.qt import QtGui
 
 browser_widget = sgtk.platform.import_framework("tk-framework-widget", "browser_widget")
 
