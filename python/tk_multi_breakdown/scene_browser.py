@@ -180,7 +180,7 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
                 self._worker.queue_work(i._calculate_status, {"id": id(i)})
 
     def _on_item_load_complete(self, uid, data):
-        #TODO: If we go with this option, put the ids in a dict for faster lookup?
+        # TODO: If we go with this option, put the ids in a dict for faster lookup?
         match = [x for x in self._dynamic_widgets if id(x) == data.get("id")]
         if match:
             match[0]._load_succeeded(data)

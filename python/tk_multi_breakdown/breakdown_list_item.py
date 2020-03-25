@@ -59,9 +59,7 @@ class BreakdownListItem(browser_widget.ListItem):
         else:
             return self._is_latest == False
 
-    def _load_started(
-        self, template, fields, show_red, show_green, entity_dict=None
-    ):
+    def _load_started(self, template, fields, show_red, show_green, entity_dict=None):
         """
         Figure out if this is a red or a green one. Also get thumb if possible
         """
@@ -86,9 +84,7 @@ class BreakdownListItem(browser_widget.ListItem):
         status for this item. This is run in a worker thread.
         """
         # set up the payload
-        output = {
-            "id": data["id"]
-        }
+        output = {"id": data["id"]}
 
         # First, calculate the thumbnail
         # see if we can download a thumbnail
