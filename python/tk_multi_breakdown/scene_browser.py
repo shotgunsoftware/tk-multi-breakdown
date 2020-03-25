@@ -39,12 +39,17 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
             second,
         )
 
+    def set_app(self, app):
+        browser_widget.BrowserWidget.set_app(self, app)
+        self._worker.work_completed.connect(self._on_item_load_complete)
+
     def process_result(self, result):
 
         if len(result.get("items")) == 0:
             self.set_message("No versioned data in your scene!")
             return
 
+        self._worker_uids = {}
         ################################################################################
         # PASS 1 - grouping
         # group these items into various buckets first based on type, and asset type
@@ -166,12 +171,17 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
 
                 i.set_details("<table>%s</table>" % inner)
 
-                # finally, ask the node to calculate its red-green status
-                # this will happen asynchronously.
-                i.calculate_status(
+                i._load_started(
                     d["template"],
                     d["fields"],
                     result["show_red"],
                     result["show_green"],
                     d.get("sg_data"),
                 )
+                self._worker.queue_work(i._calculate_status, {"id": id(i)})
+
+    def _on_item_load_complete(self, uid, data):
+        #TODO: If we go with this option, put the ids in a dict for faster lookup?
+        match = [x for x in self._dynamic_widgets if id(x) == data.get("id")]
+        if match:
+            match[0]._load_succeeded(data)

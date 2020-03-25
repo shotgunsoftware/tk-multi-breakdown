@@ -59,7 +59,7 @@ class BreakdownListItem(browser_widget.ListItem):
         else:
             return self._is_latest == False
 
-    def calculate_status(
+    def _load_started(
         self, template, fields, show_red, show_green, entity_dict=None
     ):
         """
@@ -80,18 +80,15 @@ class BreakdownListItem(browser_widget.ListItem):
         self._show_green = show_green
         self._sg_data = entity_dict
 
-        # kick off the worker!
-        self._worker_uid = self._worker.queue_work(self._calculate_status, {})
-        self._worker.work_completed.connect(self._on_worker_task_complete)
-        self._worker.work_failure.connect(self._on_worker_failure)
-
     def _calculate_status(self, data):
         """
         The computational payload that downloads thumbnails and figures out the
         status for this item. This is run in a worker thread.
         """
         # set up the payload
-        output = {}
+        output = {
+            "id": data["id"]
+        }
 
         # First, calculate the thumbnail
         # see if we can download a thumbnail
@@ -129,11 +126,7 @@ class BreakdownListItem(browser_widget.ListItem):
 
         return output
 
-    def _on_worker_failure(self, uid, msg):
-
-        if self._worker_uid != uid:
-            # not our job. ignore
-            return
+    def _load_failed(self, msg):
 
         # finally, turn off progress indication and turn on display
         self._timer.stop()
@@ -141,13 +134,11 @@ class BreakdownListItem(browser_widget.ListItem):
         # show error message
         self._app.log_warning("Worker error: %s" % msg)
 
-    def _on_worker_task_complete(self, uid, data):
+    def _load_succeeded(self, data):
         """
         Called when the computation is complete and we should update widget
         with the result
         """
-        if uid != self._worker_uid:
-            return
 
         # stop spin
         self._timer.stop()
