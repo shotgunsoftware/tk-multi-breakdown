@@ -49,7 +49,6 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
             self.set_message("No versioned data in your scene!")
             return
 
-        self._worker_uids = {}
         ################################################################################
         # PASS 1 - grouping
         # group these items into various buckets first based on type, and asset type
