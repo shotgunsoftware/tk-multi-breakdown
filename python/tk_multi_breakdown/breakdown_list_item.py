@@ -86,9 +86,6 @@ class BreakdownListItem(browser_widget.ListItem):
         self._browser._item_work_failed.connect(self._on_worker_failure)
         self._worker_uid = self._worker.queue_work(self._calculate_status, {})
 
-    def _set_task_uid(self, uid):
-        self._task_uid = uid
-
     def _calculate_status(self, data):
         """
         The computational payload that downloads thumbnails and figures out the
