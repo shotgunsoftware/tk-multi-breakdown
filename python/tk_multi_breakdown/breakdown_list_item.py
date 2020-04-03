@@ -32,6 +32,7 @@ class BreakdownListItem(browser_widget.ListItem):
         self._red_pixmap = QtGui.QPixmap(":/res/red_bullet.png")
         self._latest_version = None
         self._is_latest = None
+        self._browser = parent
 
     def _setup_ui(self):
         """
@@ -59,7 +60,9 @@ class BreakdownListItem(browser_widget.ListItem):
         else:
             return self._is_latest == False
 
-    def _load_started(self, template, fields, show_red, show_green, entity_dict=None):
+    def calculate_status(
+        self, template, fields, show_red, show_green, entity_dict=None
+    ):
         """
         Figure out if this is a red or a green one. Also get thumb if possible
         """
@@ -78,13 +81,21 @@ class BreakdownListItem(browser_widget.ListItem):
         self._show_green = show_green
         self._sg_data = entity_dict
 
+        # kick off the worker!
+        self._browser._item_work_completed.connect(self._on_worker_task_complete)
+        self._browser._item_work_failed.connect(self._on_worker_failure)
+        self._worker_uid = self._worker.queue_work(self._calculate_status, {})
+
+    def _set_task_uid(self, uid):
+        self._task_uid = uid
+
     def _calculate_status(self, data):
         """
         The computational payload that downloads thumbnails and figures out the
         status for this item. This is run in a worker thread.
         """
         # set up the payload
-        output = {"id": data["id"]}
+        output = {}
 
         # First, calculate the thumbnail
         # see if we can download a thumbnail
@@ -122,7 +133,11 @@ class BreakdownListItem(browser_widget.ListItem):
 
         return output
 
-    def _load_failed(self, msg):
+    def _on_worker_failure(self, uid, msg):
+
+        if self._worker_uid != uid:
+            # not our job. ignore
+            return
 
         # finally, turn off progress indication and turn on display
         self._timer.stop()
@@ -130,11 +145,13 @@ class BreakdownListItem(browser_widget.ListItem):
         # show error message
         self._app.log_warning("Worker error: %s" % msg)
 
-    def _load_succeeded(self, data):
+    def _on_worker_task_complete(self, uid, data):
         """
         Called when the computation is complete and we should update widget
         with the result
         """
+        if uid != self._worker_uid:
+            return
 
         # stop spin
         self._timer.stop()

@@ -10,8 +10,9 @@
 
 
 import sgtk
-
+from sgtk.platform.qt import QtCore
 from . import breakdown
+
 
 browser_widget = sgtk.platform.import_framework("tk-framework-widget", "browser_widget")
 shotgun_globals = sgtk.platform.import_framework(
@@ -22,6 +23,10 @@ from .breakdown_list_item import BreakdownListItem
 
 
 class SceneBrowserWidget(browser_widget.BrowserWidget):
+
+    _item_work_completed = QtCore.Signal(str, object)
+    _item_work_failed = QtCore.Signal(str, str)
+
     def __init__(self, parent=None):
         browser_widget.BrowserWidget.__init__(self, parent)
 
@@ -41,7 +46,14 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
 
     def set_app(self, app):
         browser_widget.BrowserWidget.set_app(self, app)
-        self._worker.work_completed.connect(self._on_item_load_complete)
+        # For some reason connecting the worker signal directly to the child items' slots causes a
+        # segmentation fault when there are many items. But re-emitting a local signal works fine
+        self._worker.work_completed.connect(
+            lambda uid, data: self._item_work_completed.emit(uid, data)
+        )
+        self._worker.work_failure.connect(
+            lambda uid, msg: self._item_work_failed.emit(uid, msg)
+        )
 
     def process_result(self, result):
 
@@ -170,17 +182,12 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
 
                 i.set_details("<table>%s</table>" % inner)
 
-                i._load_started(
+                # finally, ask the node to calculate its red-green status
+                # this will happen asynchronously.
+                i.calculate_status(
                     d["template"],
                     d["fields"],
                     result["show_red"],
                     result["show_green"],
                     d.get("sg_data"),
                 )
-                self._worker.queue_work(i._calculate_status, {"id": id(i)})
-
-    def _on_item_load_complete(self, uid, data):
-        # TODO: If we go with this option, put the ids in a dict for faster lookup?
-        match = [x for x in self._dynamic_widgets if id(x) == data.get("id")]
-        if match:
-            match[0]._load_succeeded(data)
