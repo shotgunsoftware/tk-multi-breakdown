@@ -77,7 +77,7 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
                 if entity is None:
                     entity_type = "Unknown Type"
                 else:
-                    entity_type = entity["type"]
+                    entity_type = shotgun_globals.get_type_display_name(entity["type"])
 
                 asset_type = sg_data["entity.Asset.sg_asset_type"]
 
