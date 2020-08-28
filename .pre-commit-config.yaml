@@ -14,11 +14,13 @@ exclude: "ui\/.*py$"
 # List of super useful formatters.
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v3.2.0
     hooks:
     # Ensures the code is syntaxically correct
     - id: check-ast
       language_version: python3
+    # Ensures a yaml file is properly formatted
+    - id: check-yaml
     # Ensures a file name will resolve on all platform
     - id: check-case-conflict
     # Checks files with the execute bit set have shebangs
@@ -33,7 +35,7 @@ repos:
     - id: trailing-whitespace
   # Leave black at the bottom so all touchups are done before it is run.
   - repo: https://github.com/ambv/black
-    rev: 19.10b0
+    rev: stable
     hooks:
     - id: black
       language_version: python3

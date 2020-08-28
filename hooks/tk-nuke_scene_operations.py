@@ -60,7 +60,11 @@ class BreakdownSceneOperations(HookBaseClass):
                     for file in files:
                         path = file.filename().replace("/", os.path.sep)
                         reads.append(
-                            dict(node=clip.activeItem(), type="Clip", path=path,)
+                            dict(
+                                node=clip.activeItem(),
+                                type="Clip",
+                                path=path,
+                            )
                         )
 
         # Hiero doesn't have nodes to check, so just return the clips.
