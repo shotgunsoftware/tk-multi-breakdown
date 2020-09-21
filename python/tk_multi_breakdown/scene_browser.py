@@ -48,10 +48,10 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
         browser_widget.BrowserWidget.set_app(self, app)
         # For some reason connecting the worker signal directly to the child items' slots causes a
         # segmentation fault when there are many items. But re-emitting a local signal works fine
-        self._worker.work_completed.connect(
+        self._worker.notifier.work_completed.connect(
             lambda uid, data: self._item_work_completed.emit(uid, data)
         )
-        self._worker.work_failure.connect(
+        self._worker.notifier.work_failure.connect(
             lambda uid, msg: self._item_work_failed.emit(uid, msg)
         )
 
