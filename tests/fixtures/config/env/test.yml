@@ -10,7 +10,7 @@ engines:
 
 
 frameworks:
-  tk-framework-widget_v0.2.x:
+  tk-framework-widget_v1.x.x:
     location: {type: dev, path: '$SHOTGUN_REPOS_ROOT/tk-framework-widget' }
   tk-framework-shotgunutils_v5.x.x:
     location: {type: dev, path: '$SHOTGUN_REPOS_ROOT/tk-framework-shotgunutils' }
