@@ -16,17 +16,10 @@ Users
 ```
 
 ## Running the tests
-Navigate to the `tests` folder in the tk-core repo, and execute the test runner. Point it
-at the location of this app:
+Navigate to the `tk-multi-breakdown` folder/repo, and execute pytest.
 
-```
-cd /path/to/tk-core/tests
-./run_tests.sh --test-root=/path/to/tk-multi-breakdown/tests
-```
-
-alternatively, to run it directly:
 
 ```
 cd /path/to/tk-multi-breakdown
-/path/to/tk-core/tests/run_tests.sh --test-root=./tests
+pytest
 ```

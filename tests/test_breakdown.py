@@ -145,6 +145,8 @@ class TestApi(TestApplication):
         # this will be read by our hook so push
         # it out into env vars...
         os.environ["TEST_PATH_1"] = self.test_path_1
+        # Add the same path twice ensure that it collects both
+        os.environ["TEST_PATH_1_DUPE"] = self.test_path_1
         os.environ["TEST_PATH_2"] = self.test_path_2
 
     def test_analyze_scene(self):
@@ -152,25 +154,28 @@ class TestApi(TestApplication):
         Tests the analyze_scene method
         """
         scene_data = self.app.analyze_scene()
-        self.assertEqual(len(scene_data), 1)
 
-        item = scene_data[0]
-        self.assertEqual(
-            item["fields"],
-            {
-                "Shot": "shot_code",
-                "name": "foo",
-                "Sequence": "seq_code",
-                "Step": "step_short_name",
-                "version": 3,
-                "maya_extension": "ma",
-                "eye": "%V",
-            },
-        )
-        self.assertEqual(item["node_name"], "maya_publish")
-        self.assertEqual(item["node_type"], "TestNode")
-        self.assertEqual(item["template"], self.tk.templates["maya_shot_publish"])
-        self.assertEqual(item["sg_data"], None)
+        # There should be two identical items collected,
+        # because we provided two identical paths in the setup.
+        self.assertEqual(len(scene_data), 2)
+
+        for item in scene_data:
+            self.assertEqual(
+                item["fields"],
+                {
+                    "Shot": "shot_code",
+                    "name": "foo",
+                    "Sequence": "seq_code",
+                    "Step": "step_short_name",
+                    "version": 3,
+                    "maya_extension": "ma",
+                    "eye": "%V",
+                },
+            )
+            self.assertEqual(item["node_name"], "maya_publish")
+            self.assertEqual(item["node_type"], "TestNode")
+            self.assertEqual(item["template"], self.tk.templates["maya_shot_publish"])
+            self.assertEqual(item["sg_data"], None)
 
     def test_compute_highest_version(self):
         """
