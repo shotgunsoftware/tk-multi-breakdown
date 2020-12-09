@@ -44,13 +44,14 @@ class BreakdownSceneOperations(Hook):
         nodes.append(
             {"node": "outside_template_system", "type": "TestNode", "path": "/foo/bar"}
         )
-        nodes.append(
-            {
-                "node": "maya_publish",
-                "type": "TestNode",
-                "path": os.environ["TEST_PATH_1"],
-            }
-        )
+        for env_var in ["TEST_PATH_1", "TEST_PATH_1_DUPE"]:
+            nodes.append(
+                {
+                    "node": "maya_publish",
+                    "type": "TestNode",
+                    "path": os.environ[env_var],
+                }
+            )
 
         return nodes
 

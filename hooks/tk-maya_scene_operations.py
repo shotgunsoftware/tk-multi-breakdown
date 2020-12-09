@@ -44,13 +44,13 @@ class BreakdownSceneOperations(Hook):
         refs = []
 
         # first let's look at maya references
-        for ref in cmds.file(q=1, reference=1):
-            node_name = cmds.referenceQuery(ref, referenceNode=1)
+        for ref in cmds.file(q=True, reference=True):
+            node_name = cmds.referenceQuery(ref, referenceNode=True)
 
             # get the path and make it platform dependent
             # (maya uses C:/style/paths)
             maya_path = cmds.referenceQuery(
-                ref, filename=1, withoutCopyNumber=1
+                ref, filename=True, withoutCopyNumber=True
             ).replace("/", os.path.sep)
             refs.append({"node": node_name, "type": "reference", "path": maya_path})
 
