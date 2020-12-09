@@ -154,6 +154,9 @@ class TestApi(TestApplication):
         Tests the analyze_scene method
         """
         scene_data = self.app.analyze_scene()
+
+        # There should be two identical items collected,
+        # because we provided two identical paths in the setup.
         self.assertEqual(len(scene_data), 2)
 
         for item in scene_data:
