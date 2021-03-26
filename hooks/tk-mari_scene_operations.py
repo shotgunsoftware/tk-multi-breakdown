@@ -122,7 +122,7 @@ class MariSceneOperations(Hook):
             sg_publish_data = found_publishes.get(publish_path)
             if not sg_publish_data:
                 raise TankError(
-                    "Failed to find Shotgun publish record for '%s'" % publish_path
+                    "Failed to find SG publish record for '%s'" % publish_path
                 )
 
             # find geo in project:
