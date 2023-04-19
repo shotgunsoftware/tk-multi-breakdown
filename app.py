@@ -25,7 +25,7 @@ class MultiBreakdown(Application):
         self.engine.register_command(
             "{}...".format(self.get_setting("display_name")),
             cb,
-            {"short_name": "legacy_breakdown"},
+            {"short_name": "breakdown"},
         )
 
     @property
