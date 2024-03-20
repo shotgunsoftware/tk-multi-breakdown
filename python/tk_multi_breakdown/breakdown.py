@@ -129,7 +129,7 @@ def get_breakdown_items():
                 items.append(item)
 
     # now do a second pass on all the files that are valid to see if they are published
-    # note that we store (by convention) all things on a normalized sequence form in SG, e.g
+    # note that we store (by convention) all things on a normalized sequence form in PTR, e.g
     # all four-padded sequences are stored as '%04d' regardless if they have been published from
     # houdini, maya, nuke etc.
     valid_paths = [x.get("path") for x in items]
