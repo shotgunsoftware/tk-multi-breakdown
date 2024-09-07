@@ -1,71 +1,100 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'dialog.ui'
-#
-#      by: pyside-uic 0.2.15 running on PySide 1.2.4
-#
-# WARNING! All changes made in this file will be lost!
+################################################################################
+## Form generated from reading UI file 'dialog.ui'
+##
+## Created by: Qt User Interface Compiler version 5.15.2
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
-from sgtk.platform.qt import QtCore, QtGui
+from sgtk.platform.qt import QtCore
+for name, cls in QtCore.__dict__.items():
+    if isinstance(cls, type): globals()[name] = cls
+
+from sgtk.platform.qt import QtGui
+for name, cls in QtGui.__dict__.items():
+    if isinstance(cls, type): globals()[name] = cls
+
+
+from ..scene_browser import SceneBrowserWidget
+
+from  . import resources_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
+        if not Dialog.objectName():
+            Dialog.setObjectName(u"Dialog")
         Dialog.resize(490, 618)
-        self.verticalLayout = QtGui.QVBoxLayout(Dialog)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout = QVBoxLayout(Dialog)
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.browser = SceneBrowserWidget(Dialog)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        self.browser.setObjectName(u"browser")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.browser.sizePolicy().hasHeightForWidth())
         self.browser.setSizePolicy(sizePolicy)
-        self.browser.setObjectName("browser")
+
         self.verticalLayout.addWidget(self.browser)
-        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+
+        self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setSpacing(3)
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.groupBox = QtGui.QGroupBox(Dialog)
-        self.groupBox.setTitle("")
-        self.groupBox.setObjectName("groupBox")
-        self.horizontalLayout_2 = QtGui.QHBoxLayout(self.groupBox)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.groupBox = QGroupBox(Dialog)
+        self.groupBox.setObjectName(u"groupBox")
+        self.horizontalLayout_2 = QHBoxLayout(self.groupBox)
         self.horizontalLayout_2.setSpacing(10)
         self.horizontalLayout_2.setContentsMargins(2, 2, 2, 2)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.label = QtGui.QLabel(self.groupBox)
-        self.label.setObjectName("label")
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label = QLabel(self.groupBox)
+        self.label.setObjectName(u"label")
+
         self.horizontalLayout_2.addWidget(self.label)
-        self.chk_green = QtGui.QCheckBox(self.groupBox)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/res/green_bullet.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        self.chk_green = QCheckBox(self.groupBox)
+        self.chk_green.setObjectName(u"chk_green")
+        icon = QIcon()
+        icon.addFile(u":/res/green_bullet.png", QSize(), QIcon.Normal, QIcon.Off)
         self.chk_green.setIcon(icon)
-        self.chk_green.setObjectName("chk_green")
+
         self.horizontalLayout_2.addWidget(self.chk_green)
-        self.chk_red = QtGui.QCheckBox(self.groupBox)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/res/red_bullet.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        self.chk_red = QCheckBox(self.groupBox)
+        self.chk_red.setObjectName(u"chk_red")
+        icon1 = QIcon()
+        icon1.addFile(u":/res/red_bullet.png", QSize(), QIcon.Normal, QIcon.Off)
         self.chk_red.setIcon(icon1)
-        self.chk_red.setObjectName("chk_red")
+
         self.horizontalLayout_2.addWidget(self.chk_red)
+
         self.horizontalLayout_3.addWidget(self.groupBox)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem)
-        self.select_all = QtGui.QPushButton(Dialog)
-        self.select_all.setObjectName("select_all")
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
+
+        self.select_all = QPushButton(Dialog)
+        self.select_all.setObjectName(u"select_all")
+
         self.horizontalLayout_3.addWidget(self.select_all)
-        self.update = QtGui.QPushButton(Dialog)
-        self.update.setObjectName("update")
+
+        self.update = QPushButton(Dialog)
+        self.update.setObjectName(u"update")
+
         self.horizontalLayout_3.addWidget(self.update)
+
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
         self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+        QMetaObject.connectSlotsByName(Dialog)
+    # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Scene Breakdown", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Dialog", "Filters:", None, QtGui.QApplication.UnicodeUTF8))
-        self.select_all.setText(QtGui.QApplication.translate("Dialog", "Select All Red", None, QtGui.QApplication.UnicodeUTF8))
-        self.update.setText(QtGui.QApplication.translate("Dialog", "Update Selected", None, QtGui.QApplication.UnicodeUTF8))
-
-from ..scene_browser import SceneBrowserWidget
-from . import resources_rc
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Scene Breakdown", None))
+        self.groupBox.setTitle("")
+        self.label.setText(QCoreApplication.translate("Dialog", u"Filters:", None))
+        self.select_all.setText(QCoreApplication.translate("Dialog", u"Select All Red", None))
+        self.update.setText(QCoreApplication.translate("Dialog", u"Update Selected", None))
+    # retranslateUi
