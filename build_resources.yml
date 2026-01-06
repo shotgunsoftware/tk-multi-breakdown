@@ -6,6 +6,7 @@
 - ui_src: resources
   ui_files:
     - dialog
+    - item
   res_files:
     - resources
   py_dest: python/tk_multi_breakdown/ui
