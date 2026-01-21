@@ -164,7 +164,7 @@ def get_breakdown_items():
     sg_data = sgtk.util.find_publish(app.sgtk, paths_to_fetch, fields=fields)
 
     # process and cache shotgun items
-    for (path, sg_chunk) in sg_data.items():
+    for path, sg_chunk in sg_data.items():
         # cache item
         g_cached_sg_publish_data[path] = sg_chunk
 

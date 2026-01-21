@@ -13,7 +13,6 @@ import sgtk
 from sgtk.platform.qt import QtCore
 from . import breakdown
 
-
 browser_widget = sgtk.platform.import_framework("tk-framework-widget", "browser_widget")
 shotgun_globals = sgtk.platform.import_framework(
     "tk-framework-shotgunutils", "shotgun_globals"
@@ -171,7 +170,7 @@ class SceneBrowserWidget(browser_widget.BrowserWidget):
                     # todo: make this more generic?
                     relevant_fields = ["Shot", "Asset", "Step", "Sequence", "name"]
 
-                    for (k, v) in d["fields"].items():
+                    for k, v in d["fields"].items():
                         # only show relevant fields - a bit of a hack
                         if k in relevant_fields:
                             details.append(self._make_row(k, v))
