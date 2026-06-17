@@ -24,7 +24,7 @@ class TestApplication(TankTestBase):
         """
         Fixtures setup
         """
-        super(TestApplication, self).setUp()
+        super().setUp()
         self.setup_fixtures()
 
         # set up a path to the folder above the app folder
@@ -96,7 +96,7 @@ class TestApplication(TankTestBase):
             cur_engine.destroy()
 
         # important to call base class so it can clean up memory
-        super(TestApplication, self).tearDown()
+        super().tearDown()
 
 
 class TestApi(TestApplication):
@@ -108,7 +108,7 @@ class TestApi(TestApplication):
         """
         Fixtures setup
         """
-        super(TestApi, self).setUp()
+        super().setUp()
 
         # short hand for the app
         self.app = self.engine.apps["tk-multi-breakdown"]
